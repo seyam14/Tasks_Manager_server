@@ -62,23 +62,44 @@ async function run() {
       const result = await tasksCollection.insertOne(FormData);
       res.send(result);
     });
+
     app.get('/Tasks', async(req, res) =>{
       const result = await tasksCollection.find().toArray();
       res.send(result);
   })
-
-  app.patch('/Tasks/:id', async (req, res) => {
+  //get task on updated task page
+  app.get('/Tasks/:id', async (req, res) => {
     const id = req.params.id;
-    const filter = { _id: new ObjectId(id) };
-    const updatedDoc = {
+    const query = {_id: new ObjectId(id)}
+      const result = await tasksCollection.findOne(query)
+      res.send(result)
+});
+
+  app.put('/Tasks/:id', async(req, res) => {
+    const id = req.params.id;
+    const filter = {_id: new ObjectId(id)}
+    const options = { upsert: true };
+    const UpdateTasks = req.body;
+    const tasks = {
       $set: {
-        role: 'admin'
+          title: UpdateTasks.title, 
+          description: UpdateTasks.description, 
+          deadline: UpdateTasks.deadline, 
+          priority: UpdateTasks.priority, 
+        
       }
-    }
-    const result = await tasksCollection.updateOne(filter, updatedDoc);
+        }
+
+    const result = await tasksCollection.updateOne(filter, tasks, options);
     res.send(result);
   })
-
+    
+  app.delete('/Tasks/:id',  async (req, res) => {
+    const id = req.params.id;
+    const query = { _id: new ObjectId(id) }
+    const result = await tasksCollection.deleteOne(query);
+    res.send(result);
+  })
 
 
 
